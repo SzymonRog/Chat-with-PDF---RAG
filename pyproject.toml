@@ -9,7 +9,7 @@ description = "Production-grade RAG system for PDF documents"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "SzymonRog", email = "rogalaszymon78@gmail.com"}
 ]
 
 dependencies = [
