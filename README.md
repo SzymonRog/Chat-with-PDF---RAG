@@ -24,7 +24,7 @@ Timeline (6 weeks)
 ┌─────────────────┬──────────┬──────────┐
 │ Module          │ Status   │ Coverage │
 ├─────────────────┼──────────┼──────────┤
-│ Extraction      │ 🚧 WIP   │ 0%       │
+│ Extraction      │ 🚧 WIP   │ 70%       │
 │ Chunking        │ ⚪ Todo  │ -        │
 │ Embeddings      │ ⚪ Todo  │ -        │
 │ Retrieval       │ ⚪ Todo  │ -        │
