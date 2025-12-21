@@ -18,19 +18,39 @@ class ImageExtractor:
                 pil_page = page_image.original
 
                 for img in page.images:
-                    filename = f"page{page.page_number}_{img['name']}.png"
-                    # identyfikator obrazu
+                    # Image id
                     stream_id = id(img['stream'])
+
                     if stream_id in seen_streams:
-                        continue  # już był
+                        continue
                     seen_streams.add(stream_id)
 
                     x0, top, x1, bottom = img['x0'], img['top'], img['x1'], img['bottom']
                     pil_cropped = pil_page.crop((x0, top, x1, bottom))
-                    pil_cropped.save(f'../../data/images/{filename}.png')
 
+                    # filtrujemy obraz
+                    if not self.filter_image(pil_cropped):
+                        continue
+
+                    filename = f"page{page.page_number}_{img['name']}.png"
+                    pil_cropped.save(f'../../data/images/{filename}')
+                    self.imgs.append(filename)
 
         return self.imgs
+
+    def filter_image(self, img: Image.Image) -> bool:
+        """Return True if the image is worth keeping."""
+        min_width = 20
+        min_height = 20
+        max_ratio = 10  # np. szerokość do wysokości
+
+        w, h = img.size
+        if w < min_width or h < min_height:
+            return False
+        if max(w/h, h/w) > max_ratio:
+            return False
+        return True
+
 
 
 
