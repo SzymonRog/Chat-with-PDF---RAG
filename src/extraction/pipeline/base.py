@@ -18,10 +18,10 @@ class BaseExtractor(ABC):
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF file '{pdf_path}' doesn't exist.")
 
-        return self.extract(pdf_path)
+        return self.extract()
 
     @abstractmethod
-    def extract(self, pdf_path: Path) -> ExtractedDocument:
+    def extract(self) -> ExtractedDocument:
         """
         Extract content from pdf file.
         :param pdf_path: path to pdf file.

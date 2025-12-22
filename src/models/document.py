@@ -11,7 +11,6 @@ class DocumentMetadata:
     num_pages: int
     file_size_bytes: int
     created_at: datetime
-    pdf_version: Optional[str] = None
     author: Optional[str] = None
     title: Optional[str] = None
 
