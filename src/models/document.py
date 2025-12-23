@@ -11,8 +11,10 @@ class DocumentMetadata:
     num_pages: int
     file_size_bytes: int
     created_at: datetime
+    document_id: str
     author: Optional[str] = None
     title: Optional[str] = None
+
 
     @property
     def file_size_mb(self) -> float:
