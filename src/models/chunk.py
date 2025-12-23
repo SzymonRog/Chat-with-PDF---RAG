@@ -11,7 +11,7 @@ class Chunk:
     """
 
     text: str
-    chunk_id: int
+    chunk_id: str
     document_id: str
     chunk_index: int
 
