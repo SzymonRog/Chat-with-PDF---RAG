@@ -1,6 +1,5 @@
 
 from src.chunking.chunking_pipline import ChunkingPipeline
-from src.chunking.sentence import SentenceChunker
 from pathlib import Path
 from src.extraction.pipeline.pdf_extractor import PDFExtractor
 import time

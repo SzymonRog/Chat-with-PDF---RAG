@@ -67,14 +67,14 @@ class ChunkingPipeline:
             ValueError: If strategy name is not recognized
         """
         if self.strategy_name == "fixed_size":
-            from src.chunking.fixed_size import FixedSizeChunker
+            from src.chunking.chunking_strategies.fixed_size import FixedSizeChunker
             return FixedSizeChunker(
                 chunk_size=self.chunk_size,
                 overlap=self.overlap
             )
 
         elif self.strategy_name == "sentence":
-            from src.chunking.sentence import SentenceChunker
+            from src.chunking.chunking_strategies.sentence import SentenceChunker
             return SentenceChunker(
                 max_chunk_size=self.chunk_size,
                 overlap=self.overlap

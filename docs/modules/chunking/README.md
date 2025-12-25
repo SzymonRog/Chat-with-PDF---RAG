@@ -152,8 +152,9 @@ if len(last_token) <= 2 and last_token.isalpha():
 ## Usage Examples
 
 ### Basic Usage
+
 ```python
-from src.chunking.sentence import SentenceChunker
+from src.chunking.chunking_strategies.sentence import SentenceChunker
 
 chunker = SentenceChunker(
     max_chunk_size=400,
@@ -167,11 +168,12 @@ for chunk in chunks:
 ```
 
 ### Compare with Fixed-Size
-```python
-from src.chunking.fixed_size import FixedSizeChunker
-from src.chunking.sentence import SentenceChunker
 
-text = "..." # Your text
+```python
+from src.chunking.chunking_strategies.fixed_size import FixedSizeChunker
+from src.chunking.chunking_strategies.sentence import SentenceChunker
+
+text = "..."  # Your text
 
 # Fixed size
 fixed_chunks = FixedSizeChunker(chunk_size=400, overlap=75).chunk(text, "doc1")
