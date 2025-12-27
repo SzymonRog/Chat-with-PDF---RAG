@@ -3,8 +3,10 @@ from src.chunking.chunking_pipline import ChunkingPipeline
 from pathlib import Path
 from src.extraction.pipeline.pdf_extractor import PDFExtractor
 import time
+
+
 def main():
-    pdf_path = Path("../../pdfs/test2.pdf")
+    pdf_path = Path("../../pdfs/test.pdf")
 
     if not pdf_path.exists():
         print(f"PDF '{pdf_path}' nie istnieje. Wrzuc plik testowy do folderu pdfs/")
@@ -21,8 +23,8 @@ def main():
 
     chunker = ChunkingPipeline(
         strategy="sentence",
-        chunk_size=500,
-        overlap=50,
+        chunk_size=400,
+        overlap=40,
     )
     start = time.time()
     chunked_document = chunker.chunk_document(data)
