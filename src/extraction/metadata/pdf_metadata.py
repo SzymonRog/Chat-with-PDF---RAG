@@ -18,7 +18,7 @@ class PDFMetadata:
             file_size_bytes=pdf_path.stat().st_size,
             created_at=datetime.now(),
             author=metadata_dict.get("Author"),
-            title=metadata_dict.get("Title"),
+            title=metadata_dict.get("Title") if metadata_dict.get("Title") else pdf_path.name,
             document_id= document_id
         )
 

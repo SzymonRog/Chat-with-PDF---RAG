@@ -2,6 +2,7 @@ import time
 from typing import List
 
 from openai import OpenAI
+from transformers import AutoTokenizer
 
 from src.embeddings.cost_tracker import cost_tracker
 from src.models.chunk import Chunk

@@ -1,3 +1,4 @@
+from transformers import AutoTokenizer
 
 from src.chunking.chunking_pipline import ChunkingPipeline
 from pathlib import Path
@@ -5,9 +6,11 @@ from src.extraction.pipeline.pdf_extractor import PDFExtractor
 from src.embeddings.embedding_pipline import EmbeddingPipeline
 from src.embeddings.cost_tracker import cost_tracker
 
-
 import time
 def main():
+    tokenizer = AutoTokenizer.from_pretrained(
+        "sentence-transformers/all-MiniLM-L6-v2",
+    )
     pdf_path = Path("../../pdfs/test2.pdf")
 
     if not pdf_path.exists():
@@ -25,8 +28,9 @@ def main():
 
     chunker = ChunkingPipeline(
         strategy="sentence",
-        chunk_size=300,
-        overlap=40,
+        chunk_size=250,
+        overlap=30,
+        tokenizer=tokenizer,
     )
     start = time.time()
     chunked_document = chunker.chunk_document(data)
@@ -40,6 +44,7 @@ def main():
         provider="local",
         model_name="sentence-transformers/all-MiniLM-L6-v2",
         batch_size=2,
+        tokenizer=tokenizer,
     )
     start = time.time()
     embedded_document = embedding.embed_document(chunked_document)
@@ -53,10 +58,6 @@ def main():
 
     print(f"Model name: {embedded_document.model_name}")
 
-    print("\n --------- Embeded chanks ---------")
-    for emb_chunk in embedded_document.embedded_chunks[0:1]:
-        print(emb_chunk)
-        print("---------------------")
 
     print(cost_tracker.get_summary())
 

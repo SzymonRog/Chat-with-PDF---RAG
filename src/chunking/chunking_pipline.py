@@ -5,6 +5,9 @@ Chunking Pipeline - orchestrates different chunking strategies.
 
 from typing import List, Literal
 
+from tokenizers import Tokenizer
+from transformers import AutoTokenizer
+
 from src.models.document import ExtractedDocument
 from src.models.chunk import Chunk, ChunkedDocument
 
@@ -30,7 +33,8 @@ class ChunkingPipeline:
             self,
             strategy: Literal["fixed_size", "sentence"] = "sentence",
             chunk_size: int = 500,
-            overlap: int = 50
+            overlap: int = 50,
+            tokenizer: AutoTokenizer = None,
     ):
         """
         Initialize chunking pipeline.
@@ -44,6 +48,7 @@ class ChunkingPipeline:
         self.chunk_size = chunk_size
         self.overlap = overlap
         self._strategy = None  # Lazy loaded
+        self.tokenizer = tokenizer
 
     @property
     def strategy(self):
@@ -70,14 +75,16 @@ class ChunkingPipeline:
             from src.chunking.chunking_strategies.fixed_size import FixedSizeChunker
             return FixedSizeChunker(
                 chunk_size=self.chunk_size,
-                overlap=self.overlap
+                overlap=self.overlap,
+                tokenizer=self.tokenizer
             )
 
         elif self.strategy_name == "sentence":
             from src.chunking.chunking_strategies.sentence import SentenceChunker
             return SentenceChunker(
                 max_chunk_size=self.chunk_size,
-                overlap=self.overlap
+                overlap=self.overlap,
+                tokenizer=self.tokenizer
             )
         else:
             raise ValueError(

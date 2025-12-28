@@ -2,7 +2,7 @@ from typing import List
 import hashlib
 import re
 from src.models.chunk import Chunk
-
+from transformers import AutoTokenizer
 
 class SentenceChunker:
     """
@@ -16,16 +16,17 @@ class SentenceChunker:
       fixed-size chunking with overlap (sliding window).
     """
 
-    def __init__(self, max_chunk_size: int, overlap: int):
+    def __init__(self, max_chunk_size: int, overlap: int, tokenizer: AutoTokenizer):
         """
         Initialize the chunker.
 
-        :param max_chunk_size: Maximum number of characters per chunk.
-        :param overlap: Number of overlapping characters between chunks
+        :param max_chunk_size: Maximum number of tokens per chunk.
+        :param overlap: Number of overlapping tokens between chunks
                         when fixed-size fallback is used.
         """
         self.max_chunk_size = max_chunk_size
         self.overlap = overlap
+        self.tokenizer = tokenizer
 
     def chunk(self, text: str, document_id: str) -> List[Chunk]:
         """
@@ -50,12 +51,20 @@ class SentenceChunker:
         for paragraph in paragraphs:
             sentences = self.split_sentences_safely(text=paragraph)
 
+
+
             for sentence in sentences:
+                tokens = self.tokenizer.encode(sentence, add_special_tokens=False)
+                num_tokens = len(tokens)
                 # Fallback: very long sentence → fixed-size sliding window
-                if len(sentence) > self.max_chunk_size:
+                if num_tokens > self.max_chunk_size:
+
                     step = self.max_chunk_size - self.overlap
-                    for i in range(0, len(sentence), step):
-                        chunk_text = sentence[i : i + self.max_chunk_size]
+
+                    for i in range(0, num_tokens, step):
+                        token_window = tokens[i : i + self.max_chunk_size]
+                        chunk_text = self.tokenizer.decode(token_window)
+
                         chunks.append(
                             self._make_chunk(
                                 text=chunk_text,
@@ -65,11 +74,11 @@ class SentenceChunker:
                         )
                         chunk_index += 1
 
-                    buffer = ". "
+                    buffer = " "
                     continue
 
                 # Normal sentence packing
-                if len(buffer) + len(sentence) <= self.max_chunk_size:
+                if self.count_tokens(buffer + sentence) <= self.max_chunk_size:
                     buffer += sentence
                 else:
                     chunks.append(
@@ -119,7 +128,7 @@ class SentenceChunker:
             # Rules: do NOT split
             if last_token.isdigit():
                 continue
-            if len(last_token) <= 2 and last_token.isalpha():
+            if len(last_token) <= 3 and last_token.isalpha():
                 continue
 
             # Otherwise → sentence boundary
@@ -166,3 +175,7 @@ class SentenceChunker:
         return hashlib.sha256(
             f"{document_id}_{chunk_index}".encode()
         ).hexdigest()
+
+    def count_tokens(self, text: str) -> int:
+        """Count the number of tokens in text."""
+        return len(self.tokenizer.encode(text, add_special_tokens=True))

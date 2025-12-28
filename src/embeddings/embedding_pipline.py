@@ -18,12 +18,13 @@ class EmbeddingPipeline:
     - Lazy loads embedder on first use
     """
 
-    def __init__(self, provider="openai", model_name=None, batch_size=50):
+    def __init__(self, provider="local", model_name=None, batch_size=50, tokenizer=AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")):
         self.provider = provider
         self.model_name = model_name
         self.batch_size = batch_size
         self.total_time = 0
         self._embedder = None
+        self.tokenizer = tokenizer
 
     @property
     def embedder(self):
@@ -41,7 +42,8 @@ class EmbeddingPipeline:
         elif self.provider == "local":
             from src.embeddings.embedders.locla_embedder import LocalEmbedder
             return LocalEmbedder(
-                model_name=self.model_name
+                model_name=self.model_name,
+                tokenizer=self.tokenizer,
         )
 
         else:

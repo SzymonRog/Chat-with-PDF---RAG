@@ -3,9 +3,13 @@ from src.chunking.chunking_pipline import ChunkingPipeline
 from pathlib import Path
 from src.extraction.pipeline.pdf_extractor import PDFExtractor
 import time
-
+from transformers import AutoTokenizer
 
 def main():
+    tokenizer = AutoTokenizer.from_pretrained(
+            "sentence-transformers/all-MiniLM-L6-v2",
+            local_files_only=True,
+    )
     pdf_path = Path("../../pdfs/test.pdf")
 
     if not pdf_path.exists():
@@ -23,8 +27,9 @@ def main():
 
     chunker = ChunkingPipeline(
         strategy="sentence",
-        chunk_size=400,
-        overlap=40,
+        chunk_size=200,
+        overlap=15,
+        tokenizer = tokenizer
     )
     start = time.time()
     chunked_document = chunker.chunk_document(data)
@@ -35,7 +40,7 @@ def main():
 
     print(f"ID of doc: {chunked_document.document_id}")
     print(f"\n====== Chunks======")
-    for chunk in chunked_document.chunks[0:10]:
+    for chunk in chunked_document.chunks:
         print(chunk.text)
         print(f"-----------------")
 
