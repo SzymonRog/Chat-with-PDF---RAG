@@ -1,6 +1,9 @@
 import time
+from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
+
+from src.embeddings.cache import Cache
 from src.embeddings.embedders.openai_embedder import OpenAIEmbedder
 from src.models.chunk import Chunk
 from src.models.embedding import EmbeddedChunk, EmbeddedDocument
@@ -25,6 +28,7 @@ class EmbeddingPipeline:
         self.total_time = 0
         self._embedder = None
         self.tokenizer = tokenizer
+        self.embedding_cache = Cache(Path("../../data/tables/embedding_cache.db"))
 
     @property
     def embedder(self):
@@ -44,6 +48,7 @@ class EmbeddingPipeline:
             return LocalEmbedder(
                 model_name=self.model_name,
                 tokenizer=self.tokenizer,
+                embedding_cache=self.embedding_cache,
         )
 
         else:

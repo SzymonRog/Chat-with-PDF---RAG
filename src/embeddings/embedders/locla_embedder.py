@@ -1,9 +1,11 @@
 import time
+from pathlib import Path
 from typing import List
 
 from transformers import AutoTokenizer
 from sentence_transformers import SentenceTransformer
 
+from src.embeddings.cache import Cache
 from src.embeddings.cost_tracker import cost_tracker
 from src.models.chunk import Chunk
 from src.models.embedding import EmbeddedChunk
@@ -20,6 +22,7 @@ class LocalEmbedder:
         tokenizer: AutoTokenizer = AutoTokenizer.from_pretrained(
             "sentence-transformers/all-MiniLM-L6-v2"
         ),
+        embedding_cache = Cache(Path("../../data/tables/embedding_cache.db")),
     ):
         """
         Load the embedding model and tokenizer.
@@ -27,6 +30,8 @@ class LocalEmbedder:
         self.model_name = model_name
         self.model = SentenceTransformer(self.model_name)
         self.tokenizer = tokenizer
+        self.embedding_cache = embedding_cache
+
 
     def embed_batch(
         self,
@@ -38,8 +43,26 @@ class LocalEmbedder:
         """
         embedded_chunks: List[EmbeddedChunk] = []
 
-        for i in range(0, len(chunks), batch_size):
-            batch = chunks[i : i + batch_size]
+        cached_chunks: List[EmbeddedChunk] = []
+        new_chunks: List[Chunk] = []
+
+        for chunk in chunks:
+            cashed_vector = self.embedding_cache.get_embedding(chunk_id=chunk.chunk_id, document_id=chunk.document_id)
+            if cashed_vector is not None:
+                print("This chunk already embedded")
+                cached_chunks.append(
+                    EmbeddedChunk(
+                        chunk=chunk,
+                        embedding=cashed_vector,
+                        model_name=self.model_name,
+                        embedding_time=0.0
+                    )
+                )
+            else:
+                new_chunks.append(chunk)
+
+        for i in range(0, len(new_chunks), batch_size):
+            batch = new_chunks[i : i + batch_size]
             texts = [chunk.text for chunk in batch]
 
             start_time = time.time()
@@ -62,16 +85,24 @@ class LocalEmbedder:
 
             # Attach embeddings to original chunks
             for chunk, vector in zip(batch, vectors):
-                embedded_chunks.append(
-                    EmbeddedChunk(
+                embedded_chunk = EmbeddedChunk(
                         chunk=chunk,
                         embedding=vector,
                         model_name=self.model_name,
                         embedding_time=elapsed_time,
-                    )
+                )
+                embedded_chunks.append(embedded_chunk)
+                self.embedding_cache.save_embedding(
+                    chunk_id=chunk.chunk_id,
+                    document_id=chunk.document_id,
+                    chunk_index=chunk.chunk_index,
+                    embedding=vector,
                 )
 
-        return embedded_chunks
+        all_chunks = cached_chunks + embedded_chunks
+        all_chunks.sort(key=lambda x: x.chunk.chunk_index)
+
+        return all_chunks
 
     def count_tokens(self, text: str) -> int:
         """
