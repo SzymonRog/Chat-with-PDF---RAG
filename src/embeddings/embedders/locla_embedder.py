@@ -5,8 +5,8 @@ from typing import List
 from transformers import AutoTokenizer
 from sentence_transformers import SentenceTransformer
 
-from src.embeddings.cache import Cache
-from src.embeddings.cost_tracker import cost_tracker
+from src.cache.cache import Cache
+from src.cost_tracker.cost_tracker import cost_tracker
 from src.models.chunk import Chunk
 from src.models.embedding import EmbeddedChunk
 
@@ -19,14 +19,21 @@ class LocalEmbedder:
     def __init__(
         self,
         model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        tokenizer: AutoTokenizer = AutoTokenizer.from_pretrained(
+        tokenizer = AutoTokenizer.from_pretrained(
             "sentence-transformers/all-MiniLM-L6-v2"
         ),
         embedding_cache = Cache(Path("../../data/tables/embedding_cache.db")),
     ):
+
         """
-        Load the embedding model and tokenizer.
+            Initializes the local embedder.
+
+            Args:
+                model_name (str): Name of the Sentence-Transformers model,
+                tokenizer: Tokenizer used for token counting,
+                embedding_cache (Cache): Cache used to store and retrieve embeddings.
         """
+
         self.model_name = model_name
         self.model = SentenceTransformer(self.model_name)
         self.tokenizer = tokenizer
@@ -39,8 +46,19 @@ class LocalEmbedder:
         batch_size: int = 5,
     ) -> List[EmbeddedChunk]:
         """
-        Embed chunks in fixed-size batches and return their embeddings.
+            Embeds chunks in batches with optional cache reuse.
+
+            Cached embeddings are reused when available, while missing embeddings
+
+            Are generated using the local model.
+            Args:
+                chunks (List[Chunk]): Chunks to embed,
+                batch_size (int): Number of chunks processed in a single batch.
+            Returns:
+                List[EmbeddedChunk]: Embedded chunks ordered by chunk index.
         """
+
+
         embedded_chunks: List[EmbeddedChunk] = []
 
         cached_chunks: List[EmbeddedChunk] = []
@@ -49,7 +67,6 @@ class LocalEmbedder:
         for chunk in chunks:
             cashed_vector = self.embedding_cache.get_embedding(chunk_id=chunk.chunk_id, document_id=chunk.document_id)
             if cashed_vector is not None:
-                print("This chunk already embedded")
                 cached_chunks.append(
                     EmbeddedChunk(
                         chunk=chunk,
@@ -78,6 +95,7 @@ class LocalEmbedder:
 
             # Track token usage for the batch
             token_count = self.count_tokens(" ".join(texts))
+
             cost_tracker.track_request(
                 model_name="local",
                 num_tokens=token_count,
@@ -106,6 +124,11 @@ class LocalEmbedder:
 
     def count_tokens(self, text: str) -> int:
         """
-        Count tokens using the configured tokenizer.
+        Counts the number of tokens in the given text.
+        Args:
+            text (str): Input text.
+        Returns:
+            int: Number of tokens.
         """
+
         return len(self.tokenizer.encode(text, add_special_tokens=False))

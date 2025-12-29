@@ -4,8 +4,8 @@ from src.chunking.chunking_pipline import ChunkingPipeline
 from pathlib import Path
 from src.extraction.pipeline.pdf_extractor import PDFExtractor
 from src.embeddings.embedding_pipline import EmbeddingPipeline
-from src.embeddings.cost_tracker import cost_tracker
-from src.embeddings.cache import Cache
+from src.cost_tracker.cost_tracker import cost_tracker
+from src.cache.cache import Cache
 
 import time
 def main():
@@ -14,7 +14,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(
         "sentence-transformers/all-MiniLM-L6-v2",
     )
-    pdf_path = Path("../../pdfs/test3.pdf")
+    pdf_path = Path("../../pdfs/test5.pdf")
 
     if not pdf_path.exists():
         print(f"PDF '{pdf_path}' nie istnieje. Wrzuc plik testowy do folderu pdfs/")
@@ -41,7 +41,6 @@ def main():
     total_time = end - start
 
     print(f"Total time for chunking pipline: {total_time} seconds.")
-
     embedding = EmbeddingPipeline(
         provider="local",
         model_name="sentence-transformers/all-MiniLM-L6-v2",

@@ -4,7 +4,7 @@ from src.models.document import ExtractedDocument
 
 class BaseExtractor(ABC):
     """
-    Abstract base class for all extractors.
+    Abstract base class for extractor.
     """
 
     def extract_from_file(self, pdf_path: Path) -> ExtractedDocument:

@@ -69,7 +69,7 @@ class ChunkingPipeline:
             Instance of the selected chunking strategy
 
         Raises:
-            ValueError: If strategy name is not recognized
+            ValueError: If the strategy name is not recognized
         """
         if self.strategy_name == "fixed_size":
             from src.chunking.chunking_strategies.fixed_size import FixedSizeChunker

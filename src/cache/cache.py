@@ -5,12 +5,23 @@ import numpy as np
 
 
 class Cache:
+    """Provides SQLite-based caching for embedding vectors."""
 
     def __init__(self, db_path: Path):
+        """
+            Initializes the cache with the given database path.
+
+            Args:
+                db_path (Path): Path to the SQLite database file.
+        """
+
         self.db_path = db_path
 
 
     def create_database(self):
+        """
+            Creates the embeddings table and required indexes if they do not exist.
+        """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
@@ -33,7 +44,15 @@ class Cache:
         print("Database created!")
 
     def save_embedding(self, chunk_id: str, document_id: str, chunk_index: int, embedding: np.ndarray):
-        """Save embedding to cache"""
+        """
+            Saves an embedding vector to the cache.
+
+            Args:
+                chunk_id (str): Unique identifier of the chunk,
+                document_id (str): Identifier of the parent document,
+                chunk_index (int): Index of the chunk within the document,
+                embedding (np.ndarray): Embedding vector to store
+        """
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -51,6 +70,17 @@ class Cache:
             conn.close()
 
     def embedding_exists(self, chunk_id: str, document_id: str) -> bool:
+        """
+        Checks whether an embedding exists in the cache.
+
+        Args:
+            chunk_id (str): Chunk identifier,
+            document_id (str): Document identifier.
+
+        Returns:
+            bool: True if the embedding exists, otherwise False.
+        """
+
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
@@ -68,6 +98,16 @@ class Cache:
             conn.close()
 
     def get_embedding(self, chunk_id: str, document_id: str) -> np.ndarray | None:
+        """
+            Retrieves a cached embedding for a specific chunk.
+
+            Args:
+                chunk_id (str): Chunk identifier,
+                document_id (str): Document identifier.
+
+            Returns:
+                np.ndarray | None: Embedding vector if found, otherwise None.
+        """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
@@ -89,6 +129,15 @@ class Cache:
             conn.close()
 
     def get_document_embeddings(self, document_id: str) -> np.ndarray | None:
+        """
+        Retrieves all embeddings for a document ordered by chunk index.
+
+        Args:
+            document_id (str): Document identifier.
+
+        Returns:
+            list[dict] | None: List of embeddings with metadata, or None if not found.
+        """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
@@ -117,6 +166,13 @@ class Cache:
             conn.close()
 
     def delete_document_embedding(self, document_id: str):
+        """
+        Deletes all cached embeddings associated with a document.
+
+        Args:
+            document_id (str): Document identifier.
+        """
+
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 

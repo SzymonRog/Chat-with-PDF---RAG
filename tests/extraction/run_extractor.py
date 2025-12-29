@@ -2,7 +2,7 @@ from pathlib import Path
 from src.extraction.pipeline.pdf_extractor import PDFExtractor
 import time
 def main():
-    pdf_path = Path("../../pdfs/test.pdf")
+    pdf_path = Path("../../pdfs/test1.pdf")
 
     if not pdf_path.exists():
         print(f"PDF '{pdf_path}' nie istnieje. Wrzuc plik testowy do folderu pdfs/")

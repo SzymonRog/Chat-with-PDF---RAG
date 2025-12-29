@@ -16,7 +16,7 @@ class SentenceChunker:
       fixed-size chunking with overlap (sliding window).
     """
 
-    def __init__(self, max_chunk_size: int, overlap: int, tokenizer: AutoTokenizer):
+    def __init__(self, max_chunk_size: int, overlap: int, tokenizer):
         """
         Initialize the chunker.
 
@@ -50,7 +50,6 @@ class SentenceChunker:
 
         for paragraph in paragraphs:
             sentences = self.split_sentences_safely(text=paragraph)
-
 
 
             for sentence in sentences:
