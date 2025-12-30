@@ -2,6 +2,7 @@ import time
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
+from torch import Tensor
 
 from src.cache.cache import Cache
 from src.models.chunk import Chunk
@@ -105,3 +106,6 @@ class EmbeddingPipeline:
             model_name=self.model_name,
             total_time=self.total_time,
         )
+
+    def embed_text(self, text: str) -> List[float]:
+        return self.embedder.embed_text(text)

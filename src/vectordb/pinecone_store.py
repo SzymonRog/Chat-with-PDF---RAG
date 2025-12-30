@@ -111,3 +111,7 @@ class VectordbStore(BaseVectorStore):
         """
         self.delete_index()
         self.create_index()
+
+    def delete_document(self, document_id: str):
+        self.index.delete(filter={"document_id": document_id})
+        print(f"Deleted document {document_id}")

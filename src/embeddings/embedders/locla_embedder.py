@@ -2,6 +2,8 @@ import time
 from pathlib import Path
 from typing import List
 
+
+from torch import Tensor
 from transformers import AutoTokenizer
 from sentence_transformers import SentenceTransformer
 
@@ -132,3 +134,10 @@ class LocalEmbedder:
         """
 
         return len(self.tokenizer.encode(text, add_special_tokens=False))
+
+    def embed_text(self, text: str) -> list[float]:
+        vector = self.model.encode(
+            text,
+            normalize_embeddings=True,
+        )
+        return vector.tolist()

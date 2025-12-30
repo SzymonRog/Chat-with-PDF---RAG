@@ -36,7 +36,7 @@ class SentenceChunker:
         :param document_id: Stable identifier of the source document.
         :return: List of Chunk objects.
         """
-        SENTENCE_DELIMITERS = [ "?", "!", ";", ":"]
+        SENTENCE_DELIMITERS = [ "?", "!"]
         chunks: List[Chunk] = []
 
         # Normalize sentence delimiters to a single character ('.')
