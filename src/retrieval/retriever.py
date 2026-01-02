@@ -25,7 +25,6 @@ class Retriever:
             filter={"document_id": document_id},
             include_metadata = True,
             include_values=True,
-
         )
 
 

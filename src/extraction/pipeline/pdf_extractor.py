@@ -44,3 +44,5 @@ class PDFExtractor(BaseExtractor):
             return self.page_processor.build_result()
         finally:
             self.pdf_loader.close_pdf()
+
+

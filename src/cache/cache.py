@@ -2,6 +2,7 @@ import sqlite3
 from pathlib import Path
 
 import numpy as np
+from pdfplumber import PDF
 
 
 class Cache:
@@ -145,23 +146,13 @@ class Cache:
             cursor.execute(
                 """SELECT chunk_id, document_id, chunk_index, embedding FROM embeddings WHERE document_id = ? ORDER BY CHUNK_INDEX ASC """, (document_id,))
 
-            response = cursor.fetchall()
-            results = []
-            if response:
-                for row in response:
-                    results.append(
-                        {
-                            'chunk_id': row[0],
-                            'document_id': row[1],
-                            'chunk_index': row[2],
-                            'embedding': np.frombuffer(row[3], dtype=np.float32),
-                        }
-                    )
-                return results
+            exists = cursor.fetchone() is not None
+            if exists:
+                return True
             else:
-                return None
+                return False
         except sqlite3.IntegrityError:
-            return None
+            return False
         finally:
             conn.close()
 
@@ -182,5 +173,37 @@ class Cache:
             conn.commit()
         except sqlite3.IntegrityError:
             pass
+        finally:
+            conn.close()
+
+
+    def check_if_document_exists(self, document_id: str) -> bool:
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute(
+                """SELECT 1
+                   FROM embeddings
+                   WHERE document_id = ?
+                   ORDER BY CHUNK_INDEX ASC """, (document_id,))
+
+            response = cursor.fetchall()
+            results = []
+            if response:
+                for row in response:
+                    results.append(
+                        {
+                            'chunk_id': row[0],
+                            'document_id': row[1],
+                            'chunk_index': row[2],
+                            'embedding': np.frombuffer(row[3], dtype=np.float32),
+                        }
+                    )
+                return results
+            else:
+                return None
+        except sqlite3.IntegrityError:
+            return None
         finally:
             conn.close()
