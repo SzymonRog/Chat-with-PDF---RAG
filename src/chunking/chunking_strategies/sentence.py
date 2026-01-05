@@ -2,7 +2,6 @@ from typing import List
 import hashlib
 import re
 from src.models.chunk import Chunk
-from transformers import AutoTokenizer
 
 class SentenceChunker:
     """
@@ -50,7 +49,6 @@ class SentenceChunker:
 
         for paragraph in paragraphs:
             sentences = self.split_sentences_safely(text=paragraph)
-
 
             for sentence in sentences:
                 tokens = self.tokenizer.encode(sentence, add_special_tokens=False)
@@ -106,8 +104,10 @@ class SentenceChunker:
         """
         Split text into sentences while ignoring:
         - numeric list items (e.g. '5.')
-        - short abbreviations (1–2 letters, e.g. 'dr.', 'nr.')
+        - short abbreviations (1–3 letters, e.g. 'dr.', 'nr.')
         """
+
+        text = re.sub(r'([._\-!?])\1{2,}', r'\1', text)
 
         sentences = []
         buffer = ""
@@ -129,6 +129,8 @@ class SentenceChunker:
                 continue
             if len(last_token) <= 3 and last_token.isalpha():
                 continue
+
+
 
             # Otherwise → sentence boundary
             sentences.append(buffer.strip())

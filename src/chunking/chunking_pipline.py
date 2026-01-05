@@ -32,8 +32,8 @@ class ChunkingPipeline:
     def __init__(
             self,
             strategy: Literal["fixed_size", "sentence"] = "sentence",
-            chunk_size: int = 500,
-            overlap: int = 50,
+            chunk_size: int = 200,
+            overlap: int = 20,
             tokenizer: AutoTokenizer = None,
     ):
         """

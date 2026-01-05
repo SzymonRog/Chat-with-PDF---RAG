@@ -5,11 +5,11 @@ from pathlib import Path
 from src.extraction.pipeline.pdf_extractor import PDFExtractor
 from src.embeddings.embedding_pipline import EmbeddingPipeline
 from src.vectordb.pinecone_store import VectordbStore
-from src.cache.cache import Cache
+from src.cache.document_database import Cache
 
 import time
 def main():
-    embedding_cache = Cache(Path("../../data/tables/embedding_cache.db"))
+    embedding_cache = Cache(Path("../../data/tables/document_database.db"))
 
     tokenizer = AutoTokenizer.from_pretrained(
         "sentence-transformers/all-MiniLM-L6-v2",

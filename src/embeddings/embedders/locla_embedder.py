@@ -7,7 +7,7 @@ from torch import Tensor
 from transformers import AutoTokenizer
 from sentence_transformers import SentenceTransformer
 
-from src.cache.cache import Cache
+from src.cache.document_database import Cache
 from src.cost_tracker.cost_tracker import cost_tracker
 from src.models.chunk import Chunk
 from src.models.embedding import EmbeddedChunk
@@ -24,7 +24,7 @@ class LocalEmbedder:
         tokenizer = AutoTokenizer.from_pretrained(
             "sentence-transformers/all-MiniLM-L6-v2"
         ),
-        embedding_cache = Cache(Path("../../data/tables/embedding_cache.db")),
+        document_db = Cache(Path("../../data/tables/document_store.db")),
     ):
 
         """
@@ -39,7 +39,7 @@ class LocalEmbedder:
         self.model_name = model_name
         self.model = SentenceTransformer(self.model_name)
         self.tokenizer = tokenizer
-        self.embedding_cache = embedding_cache
+        self.document_db = document_db
 
 
     def embed_batch(
@@ -62,26 +62,10 @@ class LocalEmbedder:
 
 
         embedded_chunks: List[EmbeddedChunk] = []
+        document_id = chunks[0].document_id
 
-        cached_chunks: List[EmbeddedChunk] = []
-        new_chunks: List[Chunk] = []
-
-        for chunk in chunks:
-            cashed_vector = self.embedding_cache.get_embedding(chunk_id=chunk.chunk_id, document_id=chunk.document_id)
-            if cashed_vector is not None:
-                cached_chunks.append(
-                    EmbeddedChunk(
-                        chunk=chunk,
-                        embedding=cashed_vector,
-                        model_name=self.model_name,
-                        embedding_time=0.0
-                    )
-                )
-            else:
-                new_chunks.append(chunk)
-
-        for i in range(0, len(new_chunks), batch_size):
-            batch = new_chunks[i : i + batch_size]
+        for i in range(0, len(chunks), batch_size):
+            batch = chunks[i : i + batch_size]
             texts = [chunk.text for chunk in batch]
 
             start_time = time.time()
@@ -94,8 +78,6 @@ class LocalEmbedder:
             )
 
             elapsed_time = time.time() - start_time
-
-            # Track token usage for the batch
             token_count = self.count_tokens(" ".join(texts))
 
             cost_tracker.track_request(
@@ -111,18 +93,11 @@ class LocalEmbedder:
                         model_name=self.model_name,
                         embedding_time=elapsed_time,
                 )
+
                 embedded_chunks.append(embedded_chunk)
-                self.embedding_cache.save_embedding(
-                    chunk_id=chunk.chunk_id,
-                    document_id=chunk.document_id,
-                    chunk_index=chunk.chunk_index,
-                    embedding=vector,
-                )
 
-        all_chunks = cached_chunks + embedded_chunks
-        all_chunks.sort(key=lambda x: x.chunk.chunk_index)
-
-        return all_chunks
+        self.document_db.mark_as_embedded(document_id=document_id)
+        return embedded_chunks
 
     def count_tokens(self, text: str) -> int:
         """

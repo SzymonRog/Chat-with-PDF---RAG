@@ -2,9 +2,7 @@ import time
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
-from torch import Tensor
-
-from src.cache.cache import Cache
+from src.cache.document_database import Cache
 from src.models.chunk import Chunk
 from src.models.embedding import EmbeddedChunk, EmbeddedDocument
 from transformers import AutoTokenizer
@@ -31,7 +29,7 @@ class EmbeddingPipeline:
         self.total_time = 0
         self._embedder = None
         self.tokenizer = tokenizer
-        self.embedding_cache = Cache(Path("../../data/tables/embedding_cache.db"))
+        self.document_db = Cache(Path("../../data/tables/document_database.db"))
 
     @property
     def embedder(self):
@@ -65,7 +63,7 @@ class EmbeddingPipeline:
             return LocalEmbedder(
                 model_name=self.model_name,
                 tokenizer=self.tokenizer,
-                embedding_cache=self.embedding_cache,
+                document_db=self.document_db,
         )
 
         else:

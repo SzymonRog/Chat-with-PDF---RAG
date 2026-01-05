@@ -29,10 +29,6 @@ class QueryPipline:
         self.retriever = Retriever(vectordb=self.pinecone_store)
         self.generator = Generator(self.llm_name)
 
-
-
-
-
     def query(self, query: str, top_k: int) ->dict:
         embedded_query = self.embedder.embed_text(query)
 
@@ -43,4 +39,6 @@ class QueryPipline:
         )
         self.generator.generate_response(retrival=result, prompt=query)
         return {'status': 'SUCCESS'}
+
+
 
