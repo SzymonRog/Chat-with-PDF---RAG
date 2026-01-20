@@ -253,7 +253,7 @@ class Cache:
                            WHERE document_id = ?
                            """, (document_id,))
             conn.commit()
-            print(f"Document {document_id} deleted from cache")
+            return {'success': True,'message': "Document '{}' deleted".format(document_id)}
         finally:
             conn.close()
 

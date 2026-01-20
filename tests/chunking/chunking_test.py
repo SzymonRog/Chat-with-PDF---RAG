@@ -10,7 +10,7 @@ def main():
             "sentence-transformers/all-MiniLM-L6-v2",
             local_files_only=True,
     )
-    pdf_path = Path("../../pdfs/test5.pdf")
+    pdf_path = Path("../../data/pdfs/test5.pdf")
 
     if not pdf_path.exists():
         print(f"PDF '{pdf_path}' nie istnieje. Wrzuc plik testowy do folderu pdfs/")

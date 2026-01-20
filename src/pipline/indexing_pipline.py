@@ -14,6 +14,7 @@ from src.extraction.pipeline.pdf_loader import PDFLoader
 from src.models.chunk import ChunkedDocument
 from src.models.document import ExtractedDocument
 from src.models.embedding import EmbeddedDocument
+from src.models.errors import IndexingError
 from src.vectordb.pinecone_store import VectordbStore
 
 
@@ -31,7 +32,12 @@ class IndexingPipline:
         self.pdf_path = pdf_path
 
         self.pdf_metadata = PDFMetadata()
-        self.document_db = Cache(Path("../../data/tables/document_database.db"))
+
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        db_path = base_dir / "data/tables/document_database.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.document_db = Cache(db_path)
+
         self.pdf_loader = PDFLoader(pdf_path)
 
         self.pdf_extractor = None
@@ -44,13 +50,13 @@ class IndexingPipline:
         )
         self.document_id = None
 
-        self.batch_size = 512 // chunk_size
+        self.batch_size = max(1, 512 // chunk_size)
 
     def index_document(self, pdf_path: Path) -> Dict:
         try:
             pdf = self.pdf_loader.open_pdf()
             doc_id = self.check_if_exists(pdf_path, pdf)
-            has_changed = self.check_if_changed(doc_id)
+            has_changed = self.check_if_changed(doc_id) if doc_id else None
 
             if doc_id and not has_changed:
                 print(f"Document already exists in DB\nDocument ID: {doc_id}")
@@ -68,6 +74,7 @@ class IndexingPipline:
                     model_name=self.model_name,
                     batch_size=self.batch_size,
                     tokenizer=self.tokenizer,
+                    document_db=self.document_db,
                 )
 
                 print("Extracting documents...")
@@ -114,7 +121,7 @@ class IndexingPipline:
                 return {'success': True, 'message': 'Document successfully indexed', 'document_id': self.document_id, 'has_changed': True}
 
         except Exception as e:
-            return {'success': False, 'message': str(e)}
+            raise IndexingError(str(e))
         finally:
             self.pdf_loader.close_pdf()
 

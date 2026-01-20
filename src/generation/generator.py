@@ -43,7 +43,7 @@ class Generator:
                 'content': f"User prompt: {prompt} |\n Retrival: {formated_content}",
             }
         ])
-        print(response['message']['content'])
+        return response['message']['content']
 
     def _format_retrival(self, retrival):
         data = [{'chunk_text': match['metadata']['text'], 'score': match['score']} for match in retrival]

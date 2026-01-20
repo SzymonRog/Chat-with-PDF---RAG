@@ -16,7 +16,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(
         "sentence-transformers/all-mpnet-base-v2",
     )
-    pdf_path = Path("../../pdfs/test7.pdf")
+    pdf_path = Path("../../data/pdfs/test7.pdf")
 
     if not pdf_path.exists():
         print(f"PDF '{pdf_path}' nie istnieje. Wrzuc plik testowy do folderu pdfs/")

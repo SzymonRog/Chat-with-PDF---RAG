@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List
 
 
-from torch import Tensor
+
 from transformers import AutoTokenizer
 from sentence_transformers import SentenceTransformer
 
@@ -56,6 +56,7 @@ class LocalEmbedder:
             Args:
                 chunks (List[Chunk]): Chunks to embed,
                 batch_size (int): Number of chunks processed in a single batch.
+                tables (List[str]): Tables to embed,
             Returns:
                 List[EmbeddedChunk]: Embedded chunks ordered by chunk index.
         """
@@ -116,3 +117,10 @@ class LocalEmbedder:
             normalize_embeddings=True,
         )
         return vector.tolist()
+
+
+
+
+
+
+

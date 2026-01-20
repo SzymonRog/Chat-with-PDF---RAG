@@ -27,7 +27,7 @@ class SentenceChunker:
         self.overlap = overlap
         self.tokenizer = tokenizer
 
-    def chunk(self, text: str, document_id: str) -> List[Chunk]:
+    def chunk(self, text: str, document_id: str, tables: List[str]) -> List[Chunk]:
         """
         Split input text into semantic chunks.
 
@@ -97,6 +97,9 @@ class SentenceChunker:
                     chunk_index=chunk_index,
                 )
             )
+
+        for chunk in self.chunk_tables(tables=tables, last_index=len(chunks), document_id=document_id):
+            chunks.append(chunk)
 
         return chunks
 
@@ -180,3 +183,17 @@ class SentenceChunker:
     def count_tokens(self, text: str) -> int:
         """Count the number of tokens in text."""
         return len(self.tokenizer.encode(text, add_special_tokens=True))
+
+
+    def chunk_tables(self, tables: List[str], last_index: int, document_id) -> list[Chunk]:
+        table_chunks = []
+        for index, table in enumerate(tables):
+            chunk_index = last_index + index
+            table_chunks.append(self._make_chunk(
+                text=table,
+                document_id=document_id,
+                chunk_index= chunk_index,
+            ))
+
+        return table_chunks
+

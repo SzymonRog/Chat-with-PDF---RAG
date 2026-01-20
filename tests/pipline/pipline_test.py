@@ -4,7 +4,7 @@ from src.pipline.rag_pipline import RAGPipline
 
 
 rag_pipline = RAGPipline(
-    pdf_path=Path("../../pdfs/test1.pdf"),
+    pdf_path=Path("../../data/pdfs/test7.pdf"),
     model_name="sentence-transformers/all-mpnet-base-v2",
     provider="local",
     strategy="sentence",

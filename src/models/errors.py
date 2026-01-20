@@ -1,0 +1,2 @@
+class IndexingError(Exception):
+    pass

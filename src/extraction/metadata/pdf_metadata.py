@@ -21,7 +21,10 @@ class PDFMetadata:
 
         metadata_dict = pdf.metadata
         num_pages = len(pdf.pages)
-        document_id = self._make_document_id(pdf_path.name, pdf_path.stat().st_size)
+
+        page_text = pdf.pages[0].extract_text()
+
+        document_id = self._make_document_id(text=page_text, size=pdf_path.stat().st_size)
         metadata = DocumentMetadata(
             filename=pdf_path.name,
             filepath=pdf_path,
@@ -35,16 +38,16 @@ class PDFMetadata:
 
         return metadata
 
-    def _make_document_id(self, filename: str, size: int) -> str:
+    def _make_document_id(self, text: str, size: int) -> str:
         """
             Generates a deterministic unique document ID based on filename and file size.
 
             Args:
-                filename (str): Name of the file.
+                text (str): Name of the file.
                 size (int): File size in bytes.
 
             Returns:
                 str: SHA-256 hash used as document ID.
         """
 
-        return hashlib.sha256(f"{filename}_{size}".encode('utf-8')).hexdigest()
+        return hashlib.sha256(f"{text}_{size}".encode('utf-8')).hexdigest()

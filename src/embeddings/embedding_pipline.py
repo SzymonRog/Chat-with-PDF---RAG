@@ -12,7 +12,7 @@ load_dotenv()
 class EmbeddingPipeline:
     """Handles embedding generation using different embedding providers."""
 
-    def __init__(self, provider="local", model_name=None, batch_size=50, tokenizer=AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")):
+    def __init__(self,document_db, provider="local", model_name="sentence-transformers/all-MiniLM-L6-v2", batch_size=50, tokenizer=AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")):
         """
             Initializes the embedding pipeline.
 
@@ -29,7 +29,13 @@ class EmbeddingPipeline:
         self.total_time = 0
         self._embedder = None
         self.tokenizer = tokenizer
-        self.document_db = Cache(Path("../../data/tables/document_database.db"))
+        self.document_db = document_db
+
+        if self.document_db is None:
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            db_path = base_dir / "data/tables/document_database.db"
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            self.document_db = Cache(db_path)
 
     @property
     def embedder(self):
@@ -93,6 +99,7 @@ class EmbeddingPipeline:
 
             Args:
                 chunked_doc: Object containing document ID and chunk list.
+                tables (List[str]): List of table names.
 
             Returns:
                 EmbeddedDocument: Embedded document with metadata and embeddings.
@@ -100,7 +107,7 @@ class EmbeddingPipeline:
 
         return EmbeddedDocument(
             document_id=chunked_doc.document_id,
-            embedded_chunks=self.embed_chunks(chunked_doc.chunks),
+            embedded_chunks=self.embed_chunks(chunks=chunked_doc.chunks),
             model_name=self.model_name,
             total_time=self.total_time,
         )

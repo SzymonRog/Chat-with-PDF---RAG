@@ -16,10 +16,11 @@ class TableExtractor:
         if table:
             self.tables.append(table)
 
-    def build_result(self) -> List[List[str]]:
+    def build_result(self) -> List[str]:
         """Return processed tables after all pages have been handled"""
         self.tables = self.process_tables(self.tables)
-        return self.tables
+        normalized_tables = self.normalize_tables(self.tables)
+        return normalized_tables
 
     def process_tables(self, tables: List[List[str]]) -> List[List[str]]:
         """Filter tables according to min rows/cols and max empty cell ratio"""
@@ -43,4 +44,43 @@ class TableExtractor:
             if processed_rows:
                 processed_tables.append(processed_rows)
 
+
         return processed_tables
+
+
+
+    def normalize_tables(self, tables: List[List[List[str]]]) -> List[str]:
+        normalized_rows: List[str] = []
+
+        for table_index, table in enumerate(tables):
+            if not table or len(table) < 2:
+                continue
+
+            headers = table[0]
+
+            for row_index, row in enumerate(table[1:]):
+                parts = []
+
+                for header, cell in zip(headers, row):
+                    cell = cell.strip()
+                    header = header.strip()
+
+                    if not cell or not header:
+                        continue
+
+                    # pomijamy czyste indeksy typu "1", "2"
+                    if header.lower() in {"id", "lp", "no", "index"}:
+                        continue
+
+                    parts.append(f"{header}: {cell}")
+
+                if parts:
+                    text = (
+                            f"Tabela {table_index + 1}, wiersz {row_index + 1}. "
+                            + " | ".join(parts)
+                    )
+                    normalized_rows.append(text)
+
+        return normalized_rows
+
+

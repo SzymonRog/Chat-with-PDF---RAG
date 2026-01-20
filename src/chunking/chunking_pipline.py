@@ -105,6 +105,7 @@ class ChunkingPipeline:
         # Delegate to strategy
         chunks = self.strategy.chunk(
             text=document.text,
+            tables=document.tables,
             document_id=document.metadata.document_id
         )
 

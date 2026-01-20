@@ -1,4 +1,5 @@
-from typing import Literal
+import time
+from typing import Literal, Dict
 from pathlib import Path
 from src.pipline.indexing_pipline import IndexingPipline
 from src.pipline.query_pipline import QueryPipline
@@ -28,30 +29,29 @@ class RAGPipline:
 
 
 
-    def process_pdf(self):
-        response = self.indexing_pipline.index_document(self.pdf_path)
-        print(response)
+    def process_pdf(self) -> Dict:
+            start_time = time.time()
+            response = self.indexing_pipline.index_document(self.pdf_path)
 
-        if response['success']:
-            self.document_id = response['document_id']
-            self.query_pipline = QueryPipline(
-                llm_name=self.llm_name,
-                model_name=self.model_name,
-                provider=self.provider,
-                document_id=self.document_id,
+            if not response["success"]:
+                return {
+                    "success": False,
+                    "message": response["message"],
+                    "time": time.time() - start_time,
+                }
 
-            )
+            return {
+                "success": True,
+                "document_id": response["document_id"],
+                "time": time.time() - start_time,
+            }
 
-            print("PDF processed successfully")
-            print("Now you can chat with your PDF")
-            self.chat()
 
 
-    def chat(self):
-        while True:
-            prompt = input("Enter the query: ")
-            self.query_pipline.query(query=prompt, top_k=5)
+    def query(self, prompt):
+        response = self.query_pipline.query(query=prompt, top_k=5)
+        return response
 
-            want_to_quit = input("Would you like to quit? (y/n): ")
-            if want_to_quit.lower() == "y":
-                break
+
+
+
